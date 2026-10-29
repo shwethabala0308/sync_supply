@@ -1,0 +1,57 @@
+# Render free-tier blueprint. Push this repo to GitHub, then in Render:
+# New -> Blueprint -> select this repo -> Apply. This provisions a free
+# Postgres database and a free web service for the FastAPI backend.
+databases:
+  - name: syncsupply-db
+    plan: free
+    databaseName: syncsupply
+    user: syncsupply
+
+services:
+  - type: web
+    name: syncsupply-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    # This is the ONLY place migrations are run. Render executes
+    # preDeployCommand to completion, once per deploy, before any new
+    # instance starts or receives traffic — exactly the semantics a
+    # migration step needs. The Dockerfile's CMD does NOT also run
+    # `alembic upgrade head` (it used to; that let a second instance race
+    # this step against the same database on a rolling deploy) — it instead
+    # verifies the schema is already at head and refuses to serve traffic
+    # if not. See backend/app/verify_schema.py and backend/Dockerfile.
+    preDeployCommand: alembic upgrade head
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: syncsupply-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://your-frontend.vercel.app,http://localhost:5173
+      - key: ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      # OTP delivery: console logging is refused outright in production
+      # (see app/main.py startup check). Resend has a genuinely free tier
+      # (3,000 emails/mo, no card) and needs only an API key — set
+      # OTP_PROVIDER=resend and fill RESEND_API_KEY to go live for free.
+      - key: OTP_PROVIDER
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
+      # Shared rate-limit storage across instances/workers. Leave unset for
+      # a single free-tier instance; set this (e.g. a free Upstash Redis
+      # database, https://upstash.com) before scaling past one instance or
+      # one worker. See app/rate_limit.py.
+      - key: REDIS_URL
+        sync: false

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.db
+backend/syncsupply.db
+
+# Env files (never commit real secrets)
+.env
+backend/.env
+frontend/.env
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/dev-dist/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+backend/.env.*
+frontend/.env.*
+
+!backend/.env.example
+!frontend/.env.example

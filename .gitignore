@@ -24,8 +24,10 @@ frontend/dev-dist/
 # Logs
 *.log
 
-backend/.env.*
-frontend/.env.*
-
-!backend/.env.example
-!frontend/.env.example
+# Additional secret and generated-file protection
+**/.env
+**/.env.*
+!**/.env.example
+.pytest_cache/
+__pycache__/
+*.py[cod]

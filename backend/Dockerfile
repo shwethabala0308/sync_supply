@@ -36,4 +36,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 #
 # $PORT is set by most free-tier hosts (Render, Railway); default to 8000
 # locally.
-CMD ["sh", "-c", "python -m app.verify_schema && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && python -m app.verify_schema && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

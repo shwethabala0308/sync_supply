@@ -15,15 +15,6 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     healthCheckPath: /api/health
-    # This is the ONLY place migrations are run. Render executes
-    # preDeployCommand to completion, once per deploy, before any new
-    # instance starts or receives traffic — exactly the semantics a
-    # migration step needs. The Dockerfile's CMD does NOT also run
-    # `alembic upgrade head` (it used to; that let a second instance race
-    # this step against the same database on a rolling deploy) — it instead
-    # verifies the schema is already at head and refuses to serve traffic
-    # if not. See backend/app/verify_schema.py and backend/Dockerfile.
-    preDeployCommand: alembic upgrade head
     envVars:
       - key: DATABASE_URL
         fromDatabase:
